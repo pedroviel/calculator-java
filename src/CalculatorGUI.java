@@ -18,7 +18,7 @@ public class CalculatorGUI {
         frame.add(display, BorderLayout.NORTH);
 
         buttoPanel = new JPanel();
-        buttoPanel.setLayout(new GridLayout(4, 4, 5, 5));
+        buttoPanel.setLayout(new GridLayout(5, 4, 5, 5));
     }
 
     public void show() {
