@@ -1,4 +1,4 @@
-package entities;
+package operations;
 
 public class Multiplication {
     public double multiply(double a, double b) {

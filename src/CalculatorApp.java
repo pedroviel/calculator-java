@@ -1,18 +1,19 @@
-import entities.Division;
-import entities.Multiplication;
-import entities.Sub;
-import entities.Sum;
+import operations.Division;
+import operations.Multiplication;
+import operations.Sub;
+import operations.Sum;
 
 import java.util.Scanner;
 
-public class Main {
+public class CalculatorApp {
     public static void main(String[] args) {
         Sum sum = new Sum();
         Sub sub = new Sub();
         Division div = new Division();
         Multiplication mul = new Multiplication();
 
-        Scanner sc = new Scanner(System.in);
+        CalculatorGUI gui = new CalculatorGUI();
+        gui.show();
 
 
 

@@ -1,4 +1,4 @@
-package entities;
+package operations;
 
 public class Sum {
     public double add(double x, double y) {
