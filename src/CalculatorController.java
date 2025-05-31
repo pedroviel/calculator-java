@@ -1,10 +1,11 @@
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.text.DecimalFormat;
+import java.util.Objects;
+
+import static java.lang.Math.sqrt;
 
 public class CalculatorController{
     @FXML
@@ -16,133 +17,252 @@ public class CalculatorController{
     private String firstNumber = "";
     private String currentNumber = "";
     private String calculationType;
+    private double result;
+    boolean isResult = false;
+    boolean percentage = false;
 
     @FXML
-    void clearEntryAction(ActionEvent event) {
-        display.setText("");
+    private void clearEntryAction(ActionEvent event) {
+        currentNumber = "0";
+        display.setText("0");
     }
 
-    void clearAction(ActionEvent event) {
-        display.setText("");
+    @FXML
+    private void clearAction(ActionEvent event) {
+        currentNumber = "0";
+        display.setText("0");
         savedNumbers.setText("");
     }
 
-    void deleteAction(ActionEvent event) {
+    @FXML
+    private void deleteAction(ActionEvent event) {
+        if(isResult) {
+            clearAction(event);
+        }
 
+        if(currentNumber.length() == 1){
+            display.setText("0");
+            currentNumber = "0";
+        }
+
+        if(currentNumber.length() > 1){
+            currentNumber = currentNumber.substring(0, currentNumber.length() - 1);
+        }
+
+        display.setText(currentNumber);
     }
 
     @FXML
-    void addAction(ActionEvent event) {
+    private void addAction(ActionEvent event) {
+        isResult = false;
         calculationSetup("+");
     }
 
     @FXML
-    void divAction(ActionEvent event) {
-        calculationSetup("/");
+    private void divAction(ActionEvent event) {
+        isResult = false;
+        calculationSetup("÷");
     }
 
     @FXML
-    void mulAction(ActionEvent event) {
-        calculationSetup("*");
+    private void mulAction(ActionEvent event) {
+        isResult = false;
+        calculationSetup("×");
     }
 
     @FXML
-    void subAction(ActionEvent event) {
+    private void subAction(ActionEvent event) {
+        isResult = false;
         calculationSetup("-");
     }
 
     @FXML
-    void equalsAction(ActionEvent event) {
-        calculationSetup("=");
+    private void powAction(ActionEvent event) {
+        isResult = false;
+        calculationSetup("²");
     }
 
-    void calculationSetup(String calculationType) {
+    @FXML
+    private void squareRootAction(ActionEvent event) {
+        isResult = false;
+        calculationSetup("√");
+    }
+
+    @FXML
+    private void inverseNumberAction(ActionEvent event) {
+        isResult = false;
+        calculationSetup("¹⁄ₓ");
+    }
+
+    @FXML
+    private void modAction(ActionEvent event) {
+        isResult = false;
+        calculationSetup("mod");
+    }
+
+    @FXML
+    private void percentageAction(ActionEvent event) {
+        isResult = false;
+        percentage = true;
+        calculate(event);
+    }
+
+    private void calculationSetup(String calculationType) {
         this.calculationType = calculationType;
         firstNumber = currentNumber;
         currentNumber = "";
-        savedNumbers.setText(firstNumber + " " + calculationType);
+        if(calculationType.equals("²")){
+            savedNumbers.setText(firstNumber + "²");
+        } else if (calculationType.equals("√")) {
+            savedNumbers.setText("√" + firstNumber);
+        } else if(calculationType.equals("¹⁄ₓ")) {
+            savedNumbers.setText("1/" + firstNumber);
+        } else {
+            savedNumbers.setText(firstNumber + " " + calculationType);
+        }
     }
 
-    void calculate() {
+    @FXML
+    private void calculate(ActionEvent event) {
+        if(firstNumber == null || firstNumber.isEmpty()){
+            result = 0;
+            updateDisplayAndResult(result);
+        }
         double num1 = Double.parseDouble(firstNumber);
-        double num2 = Double.parseDouble(currentNumber);
-        double result = 0;
+
         switch (calculationType) {
             case "+":
-                result = num1 + num2;
-                break;
             case "-":
-                result = num1 - num2;
+            case "×":
+            case "÷":
+            case "mod":
+                double num2 = Double.parseDouble(currentNumber);
+                if(percentage){
+                    num2 = num1 * num2 / 100;
+                    percentage = false;
+                }
+            switch (calculationType){
+                case "+":
+                    result = num1 + num2;
+                    isResult = true;
+                    break;
+                case "-":
+                    result = num1 - num2;
+                    isResult = true;
+                    break;
+                case "×":
+                    result = num1 * num2;
+                    isResult = true;
+                    break;
+                case "÷":
+                    result = num1 / num2;
+                    isResult = true;
+                    break;
+                case "mod":
+                    result = num1 % num2;
+                    isResult = true;
+                    break;
+            }
+                savedNumbers.setText(firstNumber + " " + calculationType + " " + currentNumber + " =");
+                updateDisplayAndResult(result);
                 break;
-            case "*":
-                result = num1 * num2;
+            case "²":
+                result = num1 * num1;
+                savedNumbers.setText(firstNumber + "²" + " =");
+                updateDisplayAndResult(result);
+                isResult = true;
                 break;
-            case "/":
-                result = num1 / num2;
+            case "√":
+                result = sqrt(num1);
+                savedNumbers.setText("√" + firstNumber + " =");
+                updateDisplayAndResult(result);
+                isResult = true;
                 break;
-            case "=":
-                display.setText(String.valueOf(result));
+            case "¹⁄ₓ":
+                result = 1/num1;
+                savedNumbers.setText("1/" + firstNumber + " =");
+                updateDisplayAndResult(result);
+                isResult = true;
+                break;
             default:
                 break;
         }
     }
 
+    private void updateDisplayAndResult(double result) {
+        DecimalFormat df = new DecimalFormat("#.#######");
+        String formattedResult = df.format(result).replace(",", ".");
+        display.setText(String.valueOf(formattedResult));
+
+        if(result % 1 == 0) {
+            currentNumber = String.valueOf((int) result);
+            display.setText(String.valueOf((int) result));
+        } else {
+            currentNumber = String.valueOf(formattedResult);
+            display.setText(String.valueOf(formattedResult));
+        }
+    }
+
     @FXML
-    void button1Clicked(ActionEvent event){
+    private void button1Clicked(ActionEvent event){
         addNumber("1");
     }
 
     @FXML
-    void button2Clicked(ActionEvent event){
+    private void button2Clicked(ActionEvent event){
         addNumber("2");
     }
 
     @FXML
-    void button3Clicked(ActionEvent event){
+    private void button3Clicked(ActionEvent event){
         addNumber("3");
     }
 
     @FXML
-    void button4Clicked(ActionEvent event){
+    private void button4Clicked(ActionEvent event){
         addNumber("4");
     }
 
     @FXML
-    void button5Clicked(ActionEvent event){
+    private void button5Clicked(ActionEvent event){
         addNumber("5");
     }
 
     @FXML
-    void button6Clicked(ActionEvent event){
+    private void button6Clicked(ActionEvent event){
         addNumber("6");
     }
 
     @FXML
-    void button7Clicked(ActionEvent event){
+    private void button7Clicked(ActionEvent event){
         addNumber("7");
     }
 
     @FXML
-    void button8Clicked(ActionEvent event){
+    private void button8Clicked(ActionEvent event){
         addNumber("8");
     }
 
     @FXML
-    void button9Clicked(ActionEvent event){
+    private void button9Clicked(ActionEvent event){
         addNumber("9");
     }
 
     @FXML
-    void button0Clicked(ActionEvent event){
+    private void button0Clicked(ActionEvent event){
         addNumber("0");
     }
 
-    void addNumber(String number){
-        currentNumber += number;
+    private void addNumber(String number){
+        if(Objects.equals(currentNumber, "0")){
+            currentNumber = number;
+        } else {
+            currentNumber += number;
+        }
         updateTextField();
     }
 
-    void updateTextField(){
+    private void updateTextField(){
         display.setText(currentNumber);
     }
 }

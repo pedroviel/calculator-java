@@ -9,6 +9,7 @@ public class CalculatorApp extends Application {
     public void start(Stage stage) throws Exception {
         Pane root = FXMLLoader.load(getClass().getResource("Calculator.fxml"));
         Scene scene = new Scene(root, 400, 600);
+        stage.setTitle("Calculator by Pedro Viel");
         stage.setScene(scene);
         stage.show();
 
