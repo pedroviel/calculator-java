@@ -18,8 +18,9 @@ public class CalculatorController{
     private String currentNumber = "";
     private String calculationType;
     private double result;
-    boolean isResult = false;
-    boolean percentage = false;
+    private boolean isResult = false;
+    private boolean percentage = false;
+
 
     @FXML
     private void clearEntryAction(ActionEvent event) {
@@ -30,6 +31,10 @@ public class CalculatorController{
     @FXML
     private void clearAction(ActionEvent event) {
         currentNumber = "0";
+        firstNumber = "";
+        calculationType = "";
+        isResult = false;
+        percentage = false;
         display.setText("0");
         savedNumbers.setText("");
     }
@@ -38,14 +43,12 @@ public class CalculatorController{
     private void deleteAction(ActionEvent event) {
         if(isResult) {
             clearAction(event);
+            return;
         }
 
-        if(currentNumber.length() == 1){
-            display.setText("0");
+        if(currentNumber.length() <= 1){
             currentNumber = "0";
-        }
-
-        if(currentNumber.length() > 1){
+        } else {
             currentNumber = currentNumber.substring(0, currentNumber.length() - 1);
         }
 
@@ -54,91 +57,125 @@ public class CalculatorController{
 
     @FXML
     private void addAction(ActionEvent event) {
-        isResult = false;
         calculationSetup("+");
     }
 
     @FXML
     private void divAction(ActionEvent event) {
-        isResult = false;
         calculationSetup("÷");
     }
 
     @FXML
     private void mulAction(ActionEvent event) {
-        isResult = false;
         calculationSetup("×");
     }
 
     @FXML
     private void subAction(ActionEvent event) {
-        isResult = false;
         calculationSetup("-");
     }
 
     @FXML
     private void powAction(ActionEvent event) {
-        isResult = false;
         calculationSetup("²");
     }
 
     @FXML
     private void squareRootAction(ActionEvent event) {
-        isResult = false;
         calculationSetup("√");
     }
 
     @FXML
     private void inverseNumberAction(ActionEvent event) {
-        isResult = false;
         calculationSetup("¹⁄ₓ");
     }
 
     @FXML
     private void modAction(ActionEvent event) {
-        isResult = false;
         calculationSetup("mod");
     }
 
     @FXML
     private void percentageAction(ActionEvent event) {
-        isResult = false;
         percentage = true;
-        calculate(event);
+        if(isResult) {
+            result = Double.parseDouble(currentNumber) / 100;
+            currentNumber = String.valueOf(result);
+            firstNumber = "";
+            calculationType = "";
+            savedNumbers.setText("");
+            updateDisplayAndResult(result);
+            percentage = false;
+            isResult = true;
+        } else if(calculationType == null || calculationType.isEmpty() || firstNumber.isEmpty()) {
+            result = 0;
+            currentNumber = "0";
+            updateDisplayAndResult(result);
+            percentage = false;
+            isResult = true;
+        } else {
+            calculate(event);
+        }
+    }
+
+    @FXML
+    private void decimalAction(ActionEvent event) {
+        if(!currentNumber.contains(".")) {
+            currentNumber += ".";
+            updateTextField();
+        }
     }
 
     private void calculationSetup(String calculationType) {
+        if(!firstNumber.isEmpty() && !this.calculationType.isEmpty() && !isResult) {
+            calculate(null);
+        }
         this.calculationType = calculationType;
         firstNumber = currentNumber;
         currentNumber = "";
-        if(calculationType.equals("²")){
-            savedNumbers.setText(firstNumber + "²");
-        } else if (calculationType.equals("√")) {
-            savedNumbers.setText("√" + firstNumber);
-        } else if(calculationType.equals("¹⁄ₓ")) {
-            savedNumbers.setText("1/" + firstNumber);
-        } else {
-            savedNumbers.setText(firstNumber + " " + calculationType);
+        isResult = false;
+
+        updateSavedNumbersDisplay(calculationType);
+    }
+
+    private void updateSavedNumbersDisplay(String calculationType) {
+        switch (calculationType) {
+            case "²":
+                savedNumbers.setText(firstNumber + "²");
+                break;
+            case "√":
+                savedNumbers.setText("√" + firstNumber);
+                break;
+            case "¹⁄ₓ":
+                savedNumbers.setText("1/" + firstNumber);
+                break;
+            default:
+                savedNumbers.setText(firstNumber + " " + calculationType);
+                break;
         }
     }
 
     @FXML
     private void calculate(ActionEvent event) {
-        if(firstNumber == null || firstNumber.isEmpty()){
-            result = 0;
-            updateDisplayAndResult(result);
+        if(firstNumber.isEmpty() || calculationType.isEmpty()) {
+            return;
         }
-        double num1 = Double.parseDouble(firstNumber);
 
+        double num1 = Double.parseDouble(firstNumber);
+        double num2 = 0;
         switch (calculationType) {
             case "+":
             case "-":
             case "×":
             case "÷":
             case "mod":
-                double num2 = Double.parseDouble(currentNumber);
+                if(currentNumber.isEmpty()) {
+                    return;
+                }
+                num2 = Double.parseDouble(currentNumber);
                 if(percentage){
-                    num2 = num1 * num2 / 100;
+                    num2 = num2 / 100;
+                    currentNumber = String.valueOf(num2);
                     percentage = false;
                 }
             switch (calculationType){
@@ -155,10 +192,18 @@ public class CalculatorController{
                     isResult = true;
                     break;
                 case "÷":
-                    result = num1 / num2;
+                    if(num2 == 0) {
+                        zeroDivImpossible();
+                        return;
+                    }
                     isResult = true;
+                    result = num1 / num2;
                     break;
                 case "mod":
+                    if(num2 == 0) {
+                        zeroDivImpossible();
+                        return;
+                    }
                     result = num1 % num2;
                     isResult = true;
                     break;
@@ -179,6 +224,10 @@ public class CalculatorController{
                 isResult = true;
                 break;
             case "¹⁄ₓ":
+                if(num1 == 0) {
+                    zeroDivImpossible();
+                    return;
+                }
                 result = 1/num1;
                 savedNumbers.setText("1/" + firstNumber + " =");
                 updateDisplayAndResult(result);
@@ -187,6 +236,15 @@ public class CalculatorController{
             default:
                 break;
         }
+    }
+
+    private void zeroDivImpossible() {
+        display.setText("Undefined");
+        savedNumbers.setText("");
+        currentNumber = "0";
+        calculationType = "";
+        isResult = false;
+        percentage = false;
     }
 
     private void updateDisplayAndResult(double result) {
@@ -254,6 +312,13 @@ public class CalculatorController{
     }
 
     private void addNumber(String number){
+        if(isResult) {
+            currentNumber = "0";
+            firstNumber = "";
+            calculationType = "";
+            savedNumbers.setText("");
+            isResult = false;
+        }
         if(Objects.equals(currentNumber, "0")){
             currentNumber = number;
         } else {
