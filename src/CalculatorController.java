@@ -120,6 +120,15 @@ public class CalculatorController{
 
     @FXML
     private void decimalAction(ActionEvent event) {
+        if(isResult) {
+            currentNumber = "0.";
+            firstNumber = "";
+            calculationType = "";
+            savedNumbers.setText("");
+            percentage = false;
+            isResult = false;
+            updateTextField();
+        }
         if(!currentNumber.contains(".")) {
             currentNumber += ".";
             updateTextField();
