@@ -37,7 +37,7 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
     @FXML
     private void clearAction(ActionEvent event) {
         currentNumber = "0";
-        firstNumber = "";
+        firstNumber = "0";
         currentOperation = null;
         isResult = false;
         percentage = false;
@@ -73,7 +73,7 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
         if(isResult) {
             result = Double.parseDouble(currentNumber) / 100;
             currentNumber = String.valueOf(result);
-            firstNumber = "";
+            firstNumber = "0";
             currentOperation = null;
             savedNumbers.setText("");
             updateDisplayAndResult(result);
@@ -86,7 +86,7 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
             percentage = false;
             isResult = true;
         } else {
-            calculate(event);
+            calculate();
         }
     }
 
@@ -94,7 +94,7 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
     private void decimalAction(ActionEvent event) {
         if(isResult) {
             currentNumber = "0.";
-            firstNumber = "";
+            firstNumber = "0";
             currentOperation = null;
             savedNumbers.setText("");
             percentage = false;
@@ -108,8 +108,14 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
     }
 
     public void calculationSetup(String operationSymbol) {
-        if(!firstNumber.isEmpty() && this.currentOperation != null && !isResult) {
-            calculate(null);
+        if(isOperation) {
+            this.currentOperation = Operation.fromSymbol(operationSymbol);
+            updateSavedNumbersDisplay(operationSymbol);
+            return;
+        }
+
+        if(!Objects.equals(firstNumber, "0") && this.currentOperation != null && !isResult) {
+            calculate();
         }
 
         this.currentOperation = Operation.fromSymbol(operationSymbol);
@@ -143,7 +149,7 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
     }
 
     @FXML
-    private void calculate(ActionEvent event) {
+    private void calculate() {
         if(firstNumber.isEmpty() || currentOperation == null) {
             return;
         }
@@ -161,8 +167,26 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
                 }
                 num2 = Double.parseDouble(currentNumber);
                 if(percentage){
-                    num2 = num2 / 100;
-                    currentNumber = String.valueOf(num2);
+                    num2 = num1 * num2 / 100;
+                    switch (currentOperation){
+                        case ADD:
+                        case SUB:
+                            break;
+                        case MUL:
+                            result = num2;
+                            savedNumbers.setText(firstNumber + " " + currentOperation.getSymbol() + " " + currentNumber + " =");
+                            updateDisplayAndResult(result);
+                            isResult = true;
+                            return;
+                        case DIV:
+                            result = num1 / num2 / 100;
+                            savedNumbers.setText(firstNumber + " " + currentOperation.getSymbol() + " " + currentNumber + " =");
+                            updateDisplayAndResult(result);
+                            isResult = true;
+                            return;
+                    }
+                    num2 = num1 * num2 / 100;
+                    updateDisplayAndResult(num2);
                     percentage = false;
                 }
 
@@ -250,7 +274,7 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
         if(isResult) {
             currentNumber = "0";
             currentOperation = null;
-            firstNumber = "";
+            firstNumber = "0";
             savedNumbers.setText("");
             isResult = false;
             percentage = false;
