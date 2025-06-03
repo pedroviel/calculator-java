@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 public class CalculatorApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        Pane root = FXMLLoader.load(getClass().getResource("Calculator.fxml"));
+        Pane root = FXMLLoader.load(getClass().getResource("resources/fxml/Calculator.fxml"));
         Scene scene = new Scene(root, 400, 600);
         stage.setTitle("Calculator");
         stage.setScene(scene);
