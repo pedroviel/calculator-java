@@ -1,8 +1,6 @@
 package controller;
 
 import enums.Operation;
-import interfaces.NumberButtonClicked;
-import interfaces.OperationAction;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -13,7 +11,7 @@ import java.util.Objects;
 
 import static java.lang.Math.sqrt;
 
-public class CalculatorController implements NumberButtonClicked, OperationAction {
+public class CalculatorController {
     @FXML
     private TextField display;
 
@@ -107,7 +105,7 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
         }
     }
 
-    public void calculationSetup(String operationSymbol) {
+    private void calculationSetup(String operationSymbol) {
         if(isOperation) {
             this.currentOperation = Operation.fromSymbol(operationSymbol);
             updateSavedNumbersDisplay(operationSymbol);
@@ -269,8 +267,7 @@ public class CalculatorController implements NumberButtonClicked, OperationActio
         addNumber(number);
     }
 
-    @Override
-    public void addNumber(String number) {
+    private void addNumber(String number) {
         if(isResult) {
             currentNumber = "0";
             currentOperation = null;
